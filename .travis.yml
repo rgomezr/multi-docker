@@ -14,3 +14,10 @@ after_success:
   - docker build -t rgomezrx/multi-nginx ./nginx
   - docker build -t rgomezrx/multi-server ./server
   - docker build -t rgomezrx/multi-worker ./worker
+  # Authenticate with docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Push these images into DockerHub
+  - docker push rgomezrx/multi-client
+  - docker push rgomezrx/multi-nginx
+  - docker push rgomezrx/multi-server
+  - docker push rgomezrx/multi-worker
