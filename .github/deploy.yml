@@ -1,0 +1,26 @@
+name: Test, Push and Deploy
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses actions/checkout@v3
+      # build and testing for react client
+      - run: docker build -t rgomezrx/react-test -f ./client/Dockerfile.dev ./client
+      - run: docker run -e CI=true rgomezrx/react-test npm test
+
+      - run: docker build -t rgomezrx/multi-client ./client
+      - run: docker build -t rgomezrx/multi-nginx ./nginx
+      - run: docker build -t rgomezrx/multi-server ./server
+      - run: docker build -t rgomezrx/multi-worker ./worker
+
+      - run: docker login -u ${{ secrets.DOCKER_ID }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - run: docker push rgomezrx/multi-client
+      - run: docker push rgomezrx/multi-nginx
+      - run: docker push rgomezrx/multi-server
+      - run: docker push rgomezrx/multi-worker
