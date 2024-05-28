@@ -1,0 +1,5 @@
+# General
+.DS_Store
+
+# AWS ECS Docker Run Config (Deprecated)
+Dockerrun.aws.json
