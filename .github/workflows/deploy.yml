@@ -2,13 +2,12 @@ name: Test, Push and Deploy
 on:
   push:
     branches:
-#      - master
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Build and Testing 
       - uses: actions/checkout@v3
       # build and testing for react client
       - run: docker build -t rgomezrx/react-test -f ./client/Dockerfile.dev ./client
@@ -19,25 +18,25 @@ jobs:
       - run: docker build -t rgomezrx/multi-server ./server
       - run: docker build -t rgomezrx/multi-worker ./worker
 
-      - name: Publishing Images
-      - run: echo ${{secrets.DOCKER_PASSWORD}} | docker login -u ${{ secrets.DOCKER_ID }} --password-stdin
-
+      - name: Logging into Docker
+        run: echo ${{secrets.DOCKER_PASSWORD}} | docker login -u ${{ secrets.DOCKER_ID }} --password-stdin
+        
       - run: docker push rgomezrx/multi-client
       - run: docker push rgomezrx/multi-nginx
       - run: docker push rgomezrx/multi-server
       - run: docker push rgomezrx/multi-worker
 
       - name: Generate Deployment Package
-      - run: zip -r deploy.zip . -x '*.git*'
+        run: zip -r deploy.zip . -x '*.git*'
 
       - name: Deploy to EB
-      - uses: einaregilsson/beanstalk-deploy@v18
-      - with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-        application_name: multi-docker
-        environment_name: Multi-docker-env
-        existing_bucket_name: elasticbeanstalk-eu-north-1-381492118784
-        region: eu-north-1
-        version_label: ${{ github.sha }}
-        deployment_package: deploy.zip
+        uses: einaregilsson/beanstalk-deploy@v18
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+          application_name: multi-docker
+          environment_name: Multi-docker-env
+          existing_bucket_name: elasticbeanstalk-eu-north-1-381492118784
+          region: eu-north-1
+          version_label: ${{ github.sha }}
+          deployment_package: deploy.zip
